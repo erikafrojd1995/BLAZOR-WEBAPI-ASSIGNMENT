@@ -1,0 +1,99 @@
+﻿@page "/register"
+@layout AuthorizeLayout
+@using Blazor.Models
+@using Blazor.Services
+@inject HttpClient http
+<!-- Default form register -->
+
+    <form class="text-center" action="#!">
+        <EditForm class="my-5" Model="@registerModel" OnSubmit="@CreateUser">
+            <p class="h4 mb-4">Sign up</p>
+
+            <div class="form-row mb-4">
+                <div class="col">
+                    <!-- First name -->
+                    <input type="text" id="defaultRegisterFormFirstName" class="form-control" placeholder="First name" @bind="registerModel.FirstName">
+                </div>
+                <div class="col">
+                    <!-- Last name -->
+                    <input type="text" id="defaultRegisterFormLastName" class="form-control" placeholder="Last name" @bind="registerModel.LastName">
+                </div>
+            </div>
+
+            <!-- E-mail -->
+            <input type="email" id="defaultRegisterFormEmail" class="form-control mb-4" placeholder="E-mail" @bind="registerModel.Email">
+
+            <!-- Password -->
+            <input type="password" id="defaultRegisterFormPassword" class="form-control" placeholder="Password" @bind="registerModel.Password"
+                   aria-describedby="defaultRegisterFormPasswordHelpBlock">
+            <small id="defaultRegisterFormPasswordHelpBlock" class="form-text text-muted mb-4">
+                At least 8 characters and 1 digit
+            </small>
+
+            <!-- Phone number -->
+            <input type="text" id="defaultRegisterFormRole" class="form-control mb-4" placeholder="Role" @bind="registerModel.Role">
+           
+
+            <!-- Newsletter -->
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="defaultRegisterFormNewsletter">
+                <label class="custom-control-label" for="defaultRegisterFormNewsletter">
+                    Subscribe to our
+                    newsletter
+                </label>
+            </div>
+
+            <!-- Sign up button -->
+            <button class="btn btn-info my-4 btn-block" type="submit">Sign in</button>
+        </EditForm>
+        <!-- Social register -->
+        <p>or sign up with:</p>
+
+        <a href="#" class="mx-1" role="button"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="mx-1" role="button"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="mx-1" role="button"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="mx-1" role="button"><i class="fab fa-github"></i></a>
+
+        <hr>
+
+        <!-- Terms of service -->
+        <p>
+            By clicking
+            <em>Sign up</em> you agree to our
+            <a href="" target="_blank">terms of service</a>
+        </p>
+    </form>
+<!-- Default form register -->
+
+@code{
+    private List<RegisterModel> registerModels;
+    private RegisterModel registerModel;
+    
+    
+
+
+    private async Task GetUsers()
+    {
+        
+
+        registerModels = await http.GetJsonAsync<List<RegisterModel>>("http://localhost:54596/api/users");
+        StateHasChanged();
+    }
+
+    private async Task CreateUser()
+    {
+        await http.PostJsonAsync<RegisterModel>("http://localhost:54596/api/users", registerModel);
+        StateHasChanged();
+        registerModel = new RegisterModel();
+        await GetUsers();
+
+          
+    }
+
+        protected override async Task OnInitializedAsync()
+    {
+        registerModel = new RegisterModel();
+        await GetUsers();
+    }
+
+}

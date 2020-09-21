@@ -1,0 +1,38 @@
+﻿
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Blazor.Services
+@inject NavigationManager NavigationManager
+
+
+<div class="sidebar">
+    <NavMenu />
+
+</div>
+
+<div class="main">
+    <div class="top-row px-4">
+        <AuthorizeView>
+            <Authorized>
+                <span class="mr-1">@context.User.Identity.Name</span><button class="btn btn-link" @onclick="Logout">Logga ut</button>
+            </Authorized>
+            <NotAuthorized>
+                <a class="btn btn-link" href="/login">Logga in</a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code {
+
+    private async Task Logout()
+    {
+        await ((AuthStateProvider)AuthenticationStateProvider).NotAuthenticated();
+        NavigationManager.NavigateTo("/");
+    }
+
+}

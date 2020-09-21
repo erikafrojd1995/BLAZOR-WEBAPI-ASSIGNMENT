@@ -1,0 +1,125 @@
+﻿@page "/cases"
+@using Blazor.Models
+@inject HttpClient http
+
+    <div class="container">
+        <div class="text-right">
+            <button type="submit" class="btn btn-danger" @onclick="DeleteAllCases">Ta bort alla Ärenden</button>
+        </div>
+
+        <EditForm class="my-5" Model="@cases" OnSubmit="@CreateCustomerCase">
+            <h5 class="mb-3">Skapa ett Ärende</h5>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col">
+                        <h6 class="mb-3"> Titel</h6>
+                        <input type="text" class="form-control" placeholder="Title" @bind="cases.Title" />
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-3"> Kund-ID</h6>
+                        <input type="text" class="form-control" placeholder="CustomerID" @bind="cases.CustomerId" />
+
+
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-3"> Admin-ID</h6>
+                        <input type="text" class="form-control" placeholder="UserID" @bind="cases.UserId" />
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-3"> Status på ärendet</h6>
+
+                        <select type="text" class="form-control" @bind="cases.Description">
+                            <option value="Avslutad">Mottagen</option>
+                            <option value="Påbörjad">Påbörjad</option>
+                            <option value="Avslutad">Avslutad</option>
+
+                        </select>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            <button type="submit" class="btn btn-success">Skapa Ärenden</button>
+        </EditForm>
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Ärende ID</th>
+                    <th scope="col">KundID</th>
+                    <th scope="col">AdminID</th>
+                    <th scope="col">Ärendets Titel</th>
+                    <th scope="col" colspan="2">Ärendets status</th>
+                </tr>
+            </thead>
+
+            @if (caseses != null)
+            {
+                <tbody>
+                    @foreach (var caseses in caseses)
+                    {
+                        <tr>
+                            <th scope="row">@caseses.Id</th>
+                            <td>@caseses.CustomerId</td>
+                            <td>@caseses.UserId</td>
+                            <td>@caseses.Title</td>
+                            <td>@caseses.Description</td> <!--Gjorde så att ärendestatus då jag glömde bort den delen-->
+                            <td class="text-center">
+                                <span style="cursor: pointer" class="oi oi-trash" @onclick="() => DeleteCustomerCase(caseses.Id)"></span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            }
+
+
+
+        </table>
+
+
+    </div>
+
+
+@code {
+
+
+
+    private List<CaseModel> caseses;
+    private CreateCaseModel cases;
+
+
+    private async Task GetCustomerCase()
+    {
+        caseses = await http.GetJsonAsync<List<CaseModel>>("http://localhost:54596/api/customercases");
+        StateHasChanged();
+    }
+
+    private async Task CreateCustomerCase()
+    {
+        await http.PostJsonAsync<CreateCaseModel>("http://localhost:54596/api/customercases", cases);
+        cases = new CreateCaseModel();
+        await GetCustomerCase();
+    }
+
+    private async Task DeleteAllCases()
+    {
+        await http.DeleteAsync("http://localhost:54596/api/customercases/all");
+        await GetCustomerCase();
+    }
+
+    private async Task DeleteCustomerCase(int id)
+    {
+        await http.DeleteAsync($"http://localhost:54596/api/customercases/{id}");
+        await GetCustomerCase();
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        cases = new CreateCaseModel();
+        await GetCustomerCase();
+    }
+
+}

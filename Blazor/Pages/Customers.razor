@@ -1,0 +1,105 @@
+﻿@page "/customers"
+@using Blazor.Models
+@inject HttpClient http
+
+<div class="container">
+    <div class="text-right">
+        <button type="submit" class="btn btn-danger" @onclick="DeleteAllCustomers">Ta bort alla kunder</button>
+    </div>
+
+    <EditForm class="my-5" Model="@customer" OnSubmit="@CreateCustomer">
+        <h5 class="mb-3">Skapa en kund</h5>
+        <div class="form-group">
+            <div class="row">
+                <div class="col">
+                    <input type="text" class="form-control" placeholder="Namn.." @bind="customer.Name" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="E-post..." @bind="customer.Email" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Skapa Kund</button>
+    </EditForm>
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Namn</th>
+                <th scope="col" colspan="2">Epost</th>
+            </tr>
+        </thead>
+
+        @if (customers != null)
+        {
+            <tbody>
+                @foreach (var customer in customers)
+                {
+                    <tr>
+                        <th scope="row">@customer.Id</th>
+                        <td>@customer.Name</td>
+                        <td>@customer.Email</td>
+                        <td class="text-center">
+                            <span style="cursor: pointer" class="oi oi-trash" @onclick="() => DeleteCustomers(customer.Id)"></span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        }
+
+
+
+    </table>
+
+</div>
+
+
+
+
+@code{
+
+    private List<CustomerModel> customers;
+    private CreateCustomerModel customer;
+
+    private async Task GetCustomers()
+    {
+        
+
+        customers = await http.GetJsonAsync<List<CustomerModel>>("http://localhost:54596/api/customers");
+        StateHasChanged();
+    }
+
+    private async Task CreateCustomer()
+    {
+        await http.PostJsonAsync<CreateCustomerModel>("http://localhost:54596/api/customers", customer);
+        
+        customer = new CreateCustomerModel();
+        StateHasChanged();
+        await GetCustomers();
+       
+       
+
+    }
+
+    private async Task DeleteAllCustomers()
+    {
+        await http.DeleteAsync("http://localhost:54596/api/customers/all");
+        await GetCustomers();
+    }
+
+    private async Task DeleteCustomers(int id)
+    {
+        await http.DeleteAsync($"http://localhost:54596/api/customers/{id}");
+        await GetCustomers();
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        customer = new CreateCustomerModel();
+        await GetCustomers();
+    }
+
+}
